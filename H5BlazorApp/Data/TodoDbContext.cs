@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace H5BlazorApp.Data
 {
-    public class TodoDbContext(DbContextOptions<TodoDbContext> options) : DbContext(options)
+    public class TodoDbContext : DbContext
     {
+        public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+
         public DbSet<Cpr> Cpr { get; set; }
         public DbSet<Todolist> Todolist { get; set; }
     }
