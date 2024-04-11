@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace H5BlazorApp.Migrations.TodoDb
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20240409130221_initial")]
+    [Migration("20240411170248_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -26,11 +26,11 @@ namespace H5BlazorApp.Migrations.TodoDb
 
             modelBuilder.Entity("H5BlazorApp.Data.Model.Cpr", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("CprId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CprId"));
 
                     b.Property<string>("CprNr")
                         .IsRequired()
@@ -40,18 +40,18 @@ namespace H5BlazorApp.Migrations.TodoDb
                         .IsRequired()
                         .HasColumnType("nvarchar(200)");
 
-                    b.HasKey("Id");
+                    b.HasKey("CprId");
 
                     b.ToTable("Cpr");
                 });
 
             modelBuilder.Entity("H5BlazorApp.Data.Model.Todolist", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("TodolistId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TodolistId"));
 
                     b.Property<int>("CprId")
                         .HasColumnType("int");
@@ -60,10 +60,7 @@ namespace H5BlazorApp.Migrations.TodoDb
                         .IsRequired()
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("TodolistId");
 
                     b.HasIndex("CprId");
 

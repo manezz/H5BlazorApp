@@ -1,18 +1,57 @@
 ﻿@page "/"
 
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "AuthenticatedUser")]
+
 @inject Data.TodoDbContext _todoContext
 @inject AuthenticationStateProvider _authenticantionStateProvider
+@inject Codes.HashingHandler _hashingHandler
+@using Data.Model
 
 <PageTitle>Home</PageTitle>
-
+<h3>@_currentUser</h3>
+<br />
 <div>Indstast dit cpr nr.</div>
 <input type="text" @bind="@_userInputCpr" style="width:160px;height:45px;" />
 <br />
 <input type="button" value="Submit" style="width:160px;height:45px;" @onclick="SubmitCpr" />
 
+@if(_hashedValueMatch)
+{
+    <div>Indstast to-do item</div>
+    <input type="text" @bind="@_userInputItem" style="width:160px;height:45px;" />
+    <br />
+    <input type="button" value="Submit" style="width:160px;height:45px;" @onclick="submitItem" />
+    <div>@_userInputItem</div>
+    <br />
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Item</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var todoList in _todoList)
+            {
+                <tr>
+                    <td>@todoList.Item</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if(_errorMessage != null)
+{
+    <div>@_errorMessage</div>
+}
+
 @code {
     private string? _userInputCpr;
+    private string? _userInputItem;
     private string? _currentUser;
+    private string? _errorMessage;
+    private bool _hashedValueMatch;
+    // private bool _loadTable;
+    private List<Todolist> _todoList = new List<Todolist>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,15 +61,50 @@
 
     private async Task SubmitCpr()
     {
-        var cpr = new Data.Model.Cpr
+        string _userInputCprHashed = _hashingHandler.BCryptHashing(_userInputCpr, Codes.ReturnType.String);
+
+        var user = _todoContext.Cpr.FirstOrDefault(x => x.User == _currentUser);
+        if (user == null)
         {
-            CprNr = _userInputCpr,
-            User = _currentUser
+            var cpr = new Cpr
+            {
+                CprNr = _userInputCprHashed,
+                User = _currentUser
+            };
+
+            _todoContext.Cpr.Add(cpr);
+            _todoContext.SaveChanges();
+        }
+        else
+        {
+            _hashedValueMatch = _hashingHandler.BCryptVerifyHashing(_userInputCpr, user.CprNr);
+            if (_hashedValueMatch)
+            {
+                _todoList = _todoContext.Todolist.Where(x => x.CprId == user.CprId).ToList();
+                // _loadTable = true;
+                _errorMessage = null;
+            }
+            else
+            {
+                _errorMessage = "Cpr-nr er forkert!";
+            }
+        }
+    }
+
+    private async Task submitItem()
+    {
+        var user = _todoContext.Cpr.FirstOrDefault(x => x.User == _currentUser);
+
+        var todolist = new Todolist
+        {
+            Item = _userInputItem,
+            Cpr = user
         };
 
-        _todoContext.Cpr.Add(cpr);
-        _todoContext.SaveChanges();
+        _todoList.Add(todolist);
 
-        _userInputCpr = "";
+        _todoContext.Todolist.Add(todolist);
+        _todoContext.SaveChanges();
     }
 }
+

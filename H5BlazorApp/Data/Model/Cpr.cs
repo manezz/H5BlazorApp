@@ -6,7 +6,7 @@ namespace H5BlazorApp.Data.Model
     public class Cpr
     {
         [Key]
-        public int Id { get; set; }
+        public int CprId { get; set; }
 
         [Column(TypeName = "nvarchar(200)")]
         public string User { get; set; }

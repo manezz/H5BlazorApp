@@ -14,34 +14,33 @@ namespace H5BlazorApp.Migrations.TodoDb
                 name: "Cpr",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    CprId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     User = table.Column<string>(type: "nvarchar(200)", nullable: false),
                     CprNr = table.Column<string>(type: "nvarchar(500)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Cpr", x => x.Id);
+                    table.PrimaryKey("PK_Cpr", x => x.CprId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Todolist",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    TodolistId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Item = table.Column<string>(type: "nvarchar(500)", nullable: false),
-                    CprId = table.Column<int>(type: "int", nullable: false)
+                    CprId = table.Column<int>(type: "int", nullable: false),
+                    Item = table.Column<string>(type: "nvarchar(500)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Todolist", x => x.Id);
+                    table.PrimaryKey("PK_Todolist", x => x.TodolistId);
                     table.ForeignKey(
                         name: "FK_Todolist_Cpr_CprId",
                         column: x => x.CprId,
                         principalTable: "Cpr",
-                        principalColumn: "Id",
+                        principalColumn: "CprId",
                         onDelete: ReferentialAction.Cascade);
                 });
 

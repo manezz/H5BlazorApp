@@ -1,3 +1,4 @@
+using H5BlazorApp.Codes;
 using H5BlazorApp.Components;
 using H5BlazorApp.Components.Account;
 using H5BlazorApp.Data;
@@ -15,6 +16,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddSingleton<HashingHandler>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -48,6 +50,14 @@ builder.Configuration.GetSection("Kestrel:Endpoints:Https:Certificate:Path").Val
 
 string kestrelCertPassword = builder.Configuration.GetValue<string>("KestrelCertPassword");
 builder.Configuration.GetSection("Kestrel:Endpoints:Https:Certificate:Password").Value = kestrelCertPassword;
+
+builder.Services.AddAuthorization(option =>
+{
+    option.AddPolicy("AuthenticatedUser", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+    });
+});
 
 var app = builder.Build();
 

@@ -6,10 +6,10 @@ namespace H5BlazorApp.Data.Model
     public class Todolist
     {
         [Key]
-        public int Id { get; set; }
+        public int TodolistId { get; set; }
 
-        [ForeignKey("Cpr.Id")]
-        public int UserId { get; set; }
+        [ForeignKey("Cpr.CprId")]
+        public int CprId { get; set; }
 
         [Column(TypeName = "nvarchar(500)")]
         public string Item { get; set; }
