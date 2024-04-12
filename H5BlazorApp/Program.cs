@@ -1,3 +1,4 @@
+using H5BlazorApp.Codes;
 using H5BlazorApp.Components;
 using H5BlazorApp.Components.Account;
 using H5BlazorApp.Data;
@@ -15,6 +16,9 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddSingleton<HashingHandler>();
+builder.Services.AddSingleton<SymetriskEncryptionHandler>();
+builder.Services.AddSingleton<AsymetriskEncryptionHandler>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -26,6 +30,11 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+var TodoString = builder.Configuration.GetConnectionString("TodoConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<TodoDbContext>(options =>
+    options.UseSqlServer(TodoString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -34,6 +43,23 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+userFolder = Path.Combine(userFolder, ".aspnet");
+userFolder = Path.Combine(userFolder, "https");
+userFolder = Path.Combine(userFolder, "Magnus.pfx");
+builder.Configuration.GetSection("Kestrel:Endpoints:Https:Certificate:Path").Value = userFolder;
+
+string kestrelCertPassword = builder.Configuration.GetValue<string>("KestrelCertPassword");
+builder.Configuration.GetSection("Kestrel:Endpoints:Https:Certificate:Password").Value = kestrelCertPassword;
+
+builder.Services.AddAuthorization(option =>
+{
+    option.AddPolicy("AuthenticatedUser", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+    });
+});
 
 var app = builder.Build();
 
