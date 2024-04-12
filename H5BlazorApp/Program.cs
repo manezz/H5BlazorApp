@@ -17,6 +17,8 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddSingleton<HashingHandler>();
+builder.Services.AddSingleton<SymetriskEncryptionHandler>();
+builder.Services.AddSingleton<AsymetriskEncryptionHandler>();
 
 builder.Services.AddAuthentication(options =>
     {

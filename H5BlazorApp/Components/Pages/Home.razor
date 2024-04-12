@@ -6,22 +6,23 @@
 @inject AuthenticationStateProvider _authenticantionStateProvider
 @inject Codes.HashingHandler _hashingHandler
 @using Data.Model
+@inject Codes.SymetriskEncryptionHandler _symetrikEncryptionHandler
+@inject Codes.AsymetriskEncryptionHandler _asymetriskEncryptionHandler
 
 <PageTitle>Home</PageTitle>
 <h3>@_currentUser</h3>
 <br />
-<div>Indstast dit cpr nr.</div>
+<div>Indtast dit cpr nr.</div>
 <input type="text" @bind="@_userInputCpr" style="width:160px;height:45px;" />
 <br />
 <input type="button" value="Submit" style="width:160px;height:45px;" @onclick="SubmitCpr" />
 
 @if(_hashedValueMatch)
 {
-    <div>Indstast to-do item</div>
+    <div>Indtast to-do item</div>
     <input type="text" @bind="@_userInputItem" style="width:160px;height:45px;" />
     <br />
     <input type="button" value="Submit" style="width:160px;height:45px;" @onclick="submitItem" />
-    <div>@_userInputItem</div>
     <br />
     <table class="table table-striped table-bordered">
         <thead>
@@ -33,7 +34,7 @@
             @foreach (var todoList in _todoList)
             {
                 <tr>
-                    <td>@todoList.Item</td>
+                    <td>@_asymetriskEncryptionHandler.DecryptAsymetrisk(todoList.Item)</td>
                 </tr>
             }
         </tbody>
@@ -50,11 +51,13 @@
     private string? _currentUser;
     private string? _errorMessage;
     private bool _hashedValueMatch;
-    // private bool _loadTable;
     private List<Todolist> _todoList = new List<Todolist>();
 
     protected override async Task OnInitializedAsync()
     {
+        string encryptedValue = _asymetriskEncryptionHandler.EncryptAsymetrisk("Køb Mælk");
+        string deCryptedValue = _asymetriskEncryptionHandler.DecryptAsymetrisk(encryptedValue);
+
         var authenticationState = await _authenticantionStateProvider.GetAuthenticationStateAsync();
         _currentUser = authenticationState.User.Identity.Name;
     }
@@ -81,7 +84,6 @@
             if (_hashedValueMatch)
             {
                 _todoList = _todoContext.Todolist.Where(x => x.CprId == user.CprId).ToList();
-                // _loadTable = true;
                 _errorMessage = null;
             }
             else
@@ -94,10 +96,11 @@
     private async Task submitItem()
     {
         var user = _todoContext.Cpr.FirstOrDefault(x => x.User == _currentUser);
+        string encryptedInputItem = _asymetriskEncryptionHandler.EncryptAsymetrisk(_userInputItem);
 
         var todolist = new Todolist
         {
-            Item = _userInputItem,
+            Item = encryptedInputItem,
             Cpr = user
         };
 
